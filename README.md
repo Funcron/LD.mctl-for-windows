@@ -9,7 +9,7 @@ Via Powershell
 ```
 .\mctl-0.1.1-Windows.exe                            # the console
 .\mctl-0.1.1-Windows.exe --vehicle jwst --theme retrowave --fullscreen    # iss, hubble, jwst or roman
-..\mctl-0.1.1-Windows.exe --offline                  # use cached data only; nothing is fetched, pictures come from the cache
+.\mctl-0.1.1-Windows.exe --offline                  # use cached data only; nothing is fetched, pictures come from the cache
 .\mctl-0.1.1-Windows.exe check                      # check the config and fetch each data source once
 .\mctl-0.1.1-Windows.exe about                      # licence, credits, third-party notices
 .\mctl-0.1.1-Windows.exe --replay start             # play back your recording (or an ISO time, or an offset like -2h)
