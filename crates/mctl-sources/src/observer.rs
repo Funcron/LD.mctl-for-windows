@@ -66,7 +66,8 @@ pub fn run(cfg: &Config, offline: bool, tx: &SyncSender<Event>) {
         tracing::info!("{s}");
         let _ = tx.send(Event::ObserverNote(s));
     };
-    if cfg.observer.geoclue {
+    // GeoClue is a Linux D-Bus service; on Windows go straight to the IP lookup.
+    if cfg.observer.geoclue && !cfg!(windows) {
         match geoclue::locate(cfg.observer.geoclue_timeout_s) {
             Ok(l) => {
                 let _ = tx.send(Event::Observer(Resolved {

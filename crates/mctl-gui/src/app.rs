@@ -9,6 +9,7 @@ use winit::dpi::PhysicalSize;
 use winit::event::{ElementState, WindowEvent};
 use winit::event_loop::{ActiveEventLoop, ControlFlow, EventLoop};
 use winit::keyboard::{Key, NamedKey};
+#[cfg(all(unix, not(target_os = "macos")))]
 use winit::platform::x11::EventLoopBuilderExtX11;
 use winit::window::{Fullscreen, Window, WindowId};
 
@@ -481,8 +482,10 @@ impl ApplicationHandler for App {
 }
 
 pub fn run(themes: Vec<Theme>, opts: Options) -> Result<()> {
+    #[cfg_attr(not(all(unix, not(target_os = "macos"))), allow(unused_mut))]
     let mut builder = EventLoop::builder();
     let wsl = running_under_wsl();
+    #[cfg(all(unix, not(target_os = "macos")))]
     if prefer_x11(
         wsl,
         std::env::var_os("DISPLAY").is_some_and(|d| !d.is_empty()),
@@ -532,6 +535,10 @@ fn wsl_from(distro: Option<&str>, osrelease: &str) -> bool {
 }
 
 fn running_under_wsl() -> bool {
+    // A native Windows process is not "under WSL", and has no /proc to ask.
+    if cfg!(windows) {
+        return false;
+    }
     let distro = std::env::var("WSL_DISTRO_NAME").ok();
     let osrelease = std::fs::read_to_string("/proc/sys/kernel/osrelease").unwrap_or_default();
     wsl_from(distro.as_deref(), &osrelease)
@@ -552,6 +559,7 @@ fn control_flow(wsl: bool, choice: Option<&str>) -> ControlFlow {
 /// Whether to open the window through X11 even though a Wayland compositor is available. Under WSLg the
 /// Wayland connection is dropped ("Broken pipe") when the window is resized, while its X11 server (XWayland)
 /// is fine. An explicit `WINIT_UNIX_BACKEND` is left alone, and without an X server Wayland is all there is.
+#[cfg(any(all(unix, not(target_os = "macos")), test))]
 fn prefer_x11(wsl: bool, has_x_display: bool, backend_chosen: bool) -> bool {
     wsl && has_x_display && !backend_chosen
 }

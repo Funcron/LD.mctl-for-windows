@@ -27,6 +27,9 @@ toml = "1.1.8"
 tracing = "0.1.44"
 ureq = "3"
 webpki-roots = "0.26"
+
+# GeoClue2 is a D-Bus service of Linux desktops; there is no equivalent to talk to on Windows.
+[target.'cfg(not(windows))'.dependencies]
 zbus = { version = "6.1.0", default-features = false, features = ["tokio", "proxy"] }
 
 [dev-dependencies]

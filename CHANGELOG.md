@@ -8,6 +8,10 @@ change behaviour.
 
 ### Added
 
+- A native Windows build (x86-64, MSVC): the windowed console and kiosk front ends compile and run on Windows,
+  `packaging/windows/install.ps1` installs it, `packaging/windows/make-dist.ps1` makes the release zip, and CI
+  tests, lints and builds on Windows. GeoClue, which is Linux-only, is skipped there; the IP lookup is used.
+
 - `--kiosk-order random` shows every scene once per cycle in a new random order each cycle, and
   `--kiosk-order vehicle` shows one vehicle at a time, all its scenes before the next, in a random vehicle order
   reshuffled each cycle. `--kiosk-vehicles iss,jwst` limits the display to chosen vehicles.

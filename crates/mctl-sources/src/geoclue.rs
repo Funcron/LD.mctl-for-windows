@@ -4,14 +4,20 @@
 //! by a desktop agent), and its network backends vary by distribution. Every failure comes back with
 //! the reason, so the UI can say why the fallback was used.
 
+#[cfg(not(windows))]
 use std::time::Duration;
 
+#[cfg(not(windows))]
 use futures_util::StreamExt;
+#[cfg(not(windows))]
 use zbus::OwnedObjectPath;
+#[cfg(not(windows))]
 use zbus::{Connection, Proxy};
 
+#[cfg(not(windows))]
 const SERVICE: &str = "org.freedesktop.GeoClue2";
 /// `GCLUE_ACCURACY_LEVEL_CITY`.
+#[cfg(not(windows))]
 const ACCURACY_CITY: u32 = 4;
 /// Identifier GeoClue matches against its configuration.
 pub const DESKTOP_ID: &str = "mctl";
@@ -39,6 +45,7 @@ pub enum GeoclueError {
     Other(String),
 }
 
+#[cfg(not(windows))]
 fn classify(e: zbus::Error) -> GeoclueError {
     let text = e.to_string();
     if text.contains("AccessDenied")
@@ -56,6 +63,7 @@ fn classify(e: zbus::Error) -> GeoclueError {
     }
 }
 
+#[cfg(not(windows))]
 async fn locate_async(timeout_s: f64) -> Result<Located, GeoclueError> {
     let conn = Connection::system()
         .await
@@ -141,6 +149,7 @@ async fn locate_async(timeout_s: f64) -> Result<Located, GeoclueError> {
 }
 
 /// Ask GeoClue for a city-level location; blocks for up to `timeout_s`.
+#[cfg(not(windows))]
 pub fn locate(timeout_s: f64) -> Result<Located, GeoclueError> {
     let rt = tokio::runtime::Builder::new_current_thread()
         .enable_all()
@@ -149,7 +158,16 @@ pub fn locate(timeout_s: f64) -> Result<Located, GeoclueError> {
     rt.block_on(locate_async(timeout_s))
 }
 
-#[cfg(test)]
+/// GeoClue is a D-Bus service of Linux desktops; Windows has none, so the observer chain moves on to the
+/// IP lookup and then the configured site.
+#[cfg(windows)]
+pub fn locate(_timeout_s: f64) -> Result<Located, GeoclueError> {
+    Err(GeoclueError::Unavailable(
+        "GeoClue does not exist on Windows".into(),
+    ))
+}
+
+#[cfg(all(test, not(windows)))]
 mod tests {
     use super::*;
 

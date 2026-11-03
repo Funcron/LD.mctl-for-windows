@@ -32,8 +32,12 @@ jobs:
       - run: cargo clippy --workspace --all-targets --locked -- -D warnings
 
   test:
-    name: tests
-    runs-on: ubuntu-latest
+    name: tests (${{ matrix.os }})
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
       - name: Install Rust
@@ -41,6 +45,41 @@ jobs:
       - uses: Swatinem/rust-cache@v2
       # No GPU and no network are needed: the tests that touch a GPU are ignored, and the rest use fixtures.
       - run: cargo test --workspace --locked
+
+  windows-build:
+    name: windows build and clippy
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Rust
+        run: rustup toolchain install stable --profile minimal --component clippy && rustup default stable
+      - uses: Swatinem/rust-cache@v2
+      - run: cargo clippy --workspace --all-targets --locked -- -D warnings
+      - run: cargo build --release --locked -p mctl
+      - name: The binary starts and carries its notices
+        shell: bash
+        run: |
+          target/release/mctl.exe --version
+          target/release/mctl.exe about | grep -q "GNU General Public License"
+
+  windows-render:
+    name: render every page on Windows (software DX12/WARP)
+    runs-on: windows-latest
+    # Advisory until it has passed on GitHub's runners: they have no GPU, so this relies on WARP.
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Rust
+        run: rustup toolchain install stable --profile minimal && rustup default stable
+      - uses: Swatinem/rust-cache@v2
+      - run: cargo build --release --locked -p mctl
+      - name: Render every page headless and check the images
+        shell: bash
+        env:
+          SMOKE_SOFTWARE: "1"
+          APPDATA: ${{ runner.temp }}\appdata
+          LOCALAPPDATA: ${{ runner.temp }}\localappdata
+        run: tools/smoke.sh target/release/mctl.exe
 
   docs:
     name: rustdoc

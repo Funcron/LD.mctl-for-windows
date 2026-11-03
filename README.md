@@ -22,7 +22,8 @@ The themes, on the same page (`T` cycles them):
 
 Full disclaimer, most of the code was written with Claude, Rust is not my expertise but my implementation with Python ran, well, it was seconds per frame rather than frames per second.
 
-Currently mctl has only been really tested in kubuntu and on a Pi 3B+. It runs in Ubuntu under WSL2 on Mesa's software renderer, slowly, and uses X11 there because WSLg's Wayland drops the connection when you resize. YMMV.
+Currently mctl has only been really tested in kubuntu and on a Pi 3B+. There is now a native Windows build too (see
+[Windows](#windows)), but it has not had much hardware time yet. It runs in Ubuntu under WSL2 on Mesa's software renderer, slowly, and uses X11 there because WSLg's Wayland drops the connection when you resize. YMMV.
 
 ## What that display do?
 
@@ -80,6 +81,39 @@ equivalent, then `cargo build --release --locked -p mctl`.
 
 `packaging/install.sh --uninstall` removes it again. If you're working on the code, `scripts/mctl-launch` is a
 launcher that rebuilds before it runs; symlink it as `mctl` somewhere on your `PATH`.
+
+### Windows
+
+mctl builds natively for Windows 10 and 11 (x86-64, MSVC). It draws through Direct3D 12 (or Vulkan, if you
+prefer; wgpu picks), so no extra drivers or libraries are needed beyond your normal GPU driver.
+
+A release has a `.zip`: unpack it and run `mctl.exe` from a terminal, or run
+`packaging\windows\install.ps1` to put it in `%LOCALAPPDATA%\Programs\mctl` with a Start Menu shortcut
+(`-AddToPath` also adds it to your `PATH`, `-Uninstall` removes it).
+
+To build from source, install [Rust](https://rustup.rs) (1.95 or newer) and the Visual Studio Build Tools with the
+"Desktop development with C++" workload, then:
+
+```
+git clone https://github.com/LiamDroog/mctl
+cd mctl
+cargo build --release --locked -p mctl
+target\release\mctl.exe
+```
+
+(or `powershell -ExecutionPolicy Bypass -File packaging\windows\install.ps1`, which builds and installs).
+
+Where things live on Windows:
+
+| | |
+|---|---|
+| Config | `%APPDATA%\mctl\config\config.toml` (`mctl check` prints the exact path) |
+| Cache and logs | `%LOCALAPPDATA%\mctl\cache` |
+| Recordings | `%APPDATA%\mctl\data\mctl.db` |
+
+Differences from Linux: there is no GeoClue, so the observer location comes from the IP lookup, then your
+configured site. `--kiosk` and the Pi parts are the same code but only ever tested on the Pi. The
+`--allow-software` flag will let it run on the Microsoft Basic Render Driver (WARP) if there is no GPU, slowly.
 
 ## Using it
 
