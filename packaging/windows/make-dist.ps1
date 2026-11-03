@@ -29,6 +29,8 @@ Copy-Item $Binary (Join-Path $stage 'mctl.exe')
 Copy-Item README.md, LICENSE, THIRD-PARTY-NOTICES.md, CHANGELOG.md $stage
 Copy-Item config\default.toml (Join-Path $stage 'default-config.toml')
 Copy-Item packaging\windows\install.ps1 (Join-Path $stage 'packaging\windows')
+# The launcher sits beside mctl.exe, where it looks for it first.
+Copy-Item packaging\windows\Launch-mctl.bat, packaging\windows\mctl-launcher.ps1 $stage
 
 Compress-Archive -Path $stage -DestinationPath $zip
 Remove-Item -Recurse -Force $stage

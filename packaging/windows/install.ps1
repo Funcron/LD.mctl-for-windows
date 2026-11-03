@@ -26,6 +26,7 @@ $repo = Split-Path -Parent (Split-Path -Parent $here)
 $exe = Join-Path $Prefix 'mctl.exe'
 $startMenu = Join-Path $env:APPDATA 'Microsoft\Windows\Start Menu\Programs'
 $shortcut = Join-Path $startMenu 'mctl.lnk'
+$launcherShortcut = Join-Path $startMenu 'mctl launcher.lnk'
 
 function Remove-FromUserPath([string]$dir) {
     $cur = [Environment]::GetEnvironmentVariable('Path', 'User')
@@ -35,7 +36,7 @@ function Remove-FromUserPath([string]$dir) {
 }
 
 if ($Uninstall) {
-    Remove-Item -Force -ErrorAction SilentlyContinue $exe, $shortcut
+    Remove-Item -Force -ErrorAction SilentlyContinue $exe, $shortcut, $launcherShortcut, (Join-Path $Prefix 'mctl-launcher.ps1'), (Join-Path $Prefix 'Launch-mctl.bat')
     Remove-Item -Force -ErrorAction SilentlyContinue (Join-Path $Prefix '*.md'), (Join-Path $Prefix 'LICENSE')
     if ((Test-Path $Prefix) -and -not (Get-ChildItem $Prefix)) { Remove-Item $Prefix }
     Remove-FromUserPath $Prefix
@@ -69,12 +70,27 @@ foreach ($f in 'README.md', 'LICENSE', 'THIRD-PARTY-NOTICES.md', 'CHANGELOG.md')
     if (Test-Path $src) { Copy-Item -Force $src $Prefix }
 }
 
+# The launcher: a window for choosing the theme, vehicle, kiosk mode and the other options.
+foreach ($f in 'mctl-launcher.ps1', 'Launch-mctl.bat') {
+    $src = Join-Path $here $f
+    if (-not (Test-Path $src)) { $src = Join-Path $repo $f }
+    if (Test-Path $src) { Copy-Item -Force $src $Prefix }
+}
+
 if (-not $NoShortcut) {
     $sh = (New-Object -ComObject WScript.Shell).CreateShortcut($shortcut)
     $sh.TargetPath = $exe
     $sh.WorkingDirectory = $Prefix
     $sh.Description = 'mctl: mission-control display for the ISS and the spacecraft around it'
     $sh.Save()
+    if (Test-Path (Join-Path $Prefix 'mctl-launcher.ps1')) {
+        $l = (New-Object -ComObject WScript.Shell).CreateShortcut($launcherShortcut)
+        $l.TargetPath = (Join-Path $env:SystemRoot 'System32\WindowsPowerShell\v1.0\powershell.exe')
+        $l.Arguments = '-NoProfile -ExecutionPolicy Bypass -STA -WindowStyle Hidden -File "' + (Join-Path $Prefix 'mctl-launcher.ps1') + '"'
+        $l.WorkingDirectory = $Prefix
+        $l.Description = 'Choose the theme, vehicle and other options, then start mctl'
+        $l.Save()
+    }
 }
 
 if ($AddToPath) {

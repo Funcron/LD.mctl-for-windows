@@ -103,6 +103,12 @@ target\release\mctl.exe
 
 (or `powershell -ExecutionPolicy Bypass -File packaging\windows\install.ps1`, which builds and installs).
 
+The release zip (and the Actions artifact) also has **`Launch-mctl.bat`**: double-click it for a small window with the
+theme, vehicle, window size, fullscreen, offline, replay and GPU options, the kiosk mode and its scene style,
+order and vehicles, and buttons for `check`, `about`, CSV export and screenshots of every page. The box at the
+bottom shows the exact `mctl.exe` command it will run, and it can save a desktop shortcut with your choices.
+`install.ps1` adds it to the Start Menu as "mctl launcher".
+
 Where things live on Windows:
 
 | | |

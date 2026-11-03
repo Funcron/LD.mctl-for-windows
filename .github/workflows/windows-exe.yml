@@ -27,12 +27,14 @@ jobs:
         run: |
           target/release/mctl.exe --version
           target/release/mctl.exe about | grep -q "GNU General Public License"
+      - name: Gather the files
+        shell: bash
+        run: |
+          mkdir stage
+          cp target/release/mctl.exe README.md LICENSE THIRD-PARTY-NOTICES.md stage/
+          cp packaging/windows/Launch-mctl.bat packaging/windows/mctl-launcher.ps1 stage/
       - uses: actions/upload-artifact@v4
         with:
           name: mctl-windows-x86_64
-          path: |
-            target/release/mctl.exe
-            README.md
-            LICENSE
-            THIRD-PARTY-NOTICES.md
+          path: stage
           if-no-files-found: error
