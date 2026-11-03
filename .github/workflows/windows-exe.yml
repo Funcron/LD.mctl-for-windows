@@ -1,0 +1,38 @@
+name: Windows exe
+
+# Builds mctl.exe on a Windows runner and attaches it to the run as a downloadable artifact.
+# Runs on pushes to the windows-port branch and on demand (Actions tab -> "Windows exe" -> Run workflow).
+on:
+  push:
+    branches: [windows-port]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Rust
+        run: rustup toolchain install stable --profile minimal && rustup default stable
+      - uses: Swatinem/rust-cache@v2
+      - run: cargo build --release --locked -p mctl
+      - name: Smoke test
+        shell: bash
+        run: |
+          target/release/mctl.exe --version
+          target/release/mctl.exe about | grep -q "GNU General Public License"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: mctl-windows-x86_64
+          path: |
+            target/release/mctl.exe
+            README.md
+            LICENSE
+            THIRD-PARTY-NOTICES.md
+          if-no-files-found: error
