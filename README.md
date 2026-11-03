@@ -5,7 +5,7 @@ See [LiamDroog/mctl](https://github.com/LiamDroog/mctl) for better info. This is
 Launch-mctl.bat included in release package, which acts as a basic GUI launcher for the anti-CLI folk!
 
 ## Using it
-Can be run from .exe using defaults, but the options will be accessible via PowerShell. Simplify the .exe name as you see fit:
+Can be run from .exe using defaults, but the options will be the most accessible via PowerShell:
 ```
 .\mctl.exe                            # the console
 .\mctl.exe --vehicle jwst --theme retrowave --fullscreen    # iss, hubble, jwst or roman
