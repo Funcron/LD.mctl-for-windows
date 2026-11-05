@@ -2,7 +2,7 @@
 
 See [LiamDroog/mctl](https://github.com/LiamDroog/mctl) for better info. This is a hastily crafted port to Windows using AI
 
-Launch-mctl.bat included in release package, which acts as a basic GUI launcher for the anti-CLI folk!
+Launch-mctl.bat included in release package, which acts as a basic GUI launcher for the anti-CLI folk! Otherwise:
 
 ## Using it
 Can be run from .exe using defaults, but the options will be the most accessible via PowerShell:
